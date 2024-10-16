@@ -169,18 +169,39 @@ export const deleteLecture = catchAsyncError(async (req, res, next) => {
 
 });
 
+// Course.watch().on("change", async () => {
+//     const stats = await Stats.find({}).sort({ createdAt: "desc" }).limit(1);
+
+//     const courses = await Course.find({});
+
+//     let totalViews = 0;
+
+//     for (let i = 0; i < courses.length; i++) {
+//         totalViews += courses[i].views;
+//     }
+//     stats[0].views = totalViews;
+//     stats[0].createdAt = new Date(Date.now());
+
+//     await stats[0].save();
+// })
+
 Course.watch().on("change", async () => {
-    const stats = await Stats.find({}).sort({ createdAt: "desc" }).limit(1);
+    let stats = await Stats.find({}).sort({ createdAt: "desc" }).limit(1);
+
+    // If no stats exist, create a new one
+    if (!stats.length) {
+        stats = [new Stats()];
+    }
 
     const courses = await Course.find({});
-
     let totalViews = 0;
 
     for (let i = 0; i < courses.length; i++) {
         totalViews += courses[i].views;
     }
+
     stats[0].views = totalViews;
-    stats[0].createdAt = new Date(Date.now());
+    stats[0].createdAt = new Date();
 
     await stats[0].save();
-})
+});
